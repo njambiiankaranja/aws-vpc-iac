@@ -103,13 +103,14 @@ resource "aws_route_table_association" "private_1" {
   route_table_id = aws_route_table.private.id
 }
 
-# 11. Web Security Group
+# 11. Web Security Group with Restricted SSH Access
 resource "aws_security_group" "web_sg" {
   name        = "web-sg"
-  description = "Allow HTTP and SSH traffic"
+  description = "Allow HTTP and restricted SSH traffic"
   vpc_id      = aws_vpc.main.id
 
   ingress {
+    description = "HTTP access"
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
@@ -117,10 +118,11 @@ resource "aws_security_group" "web_sg" {
   }
 
   ingress {
+    description = "Restricted SSH access"
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = [var.my_ip]
   }
 
   egress {
@@ -133,4 +135,9 @@ resource "aws_security_group" "web_sg" {
   tags = {
     Name = "web-security-group"
   }
+}
+variable "my_ip" {
+  type        = string
+  description = "My public IP address for secure SSH access"
+  default     = "0.0.0.0/32"
 }
